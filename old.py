@@ -1,7 +1,8 @@
 import pygame
 import random
+pygame.font.init()
 blockScale = 24
-gameWidth, gameHeight = 10, 20
+gameWidth, gameHeight = 40, 40
 (width, height) = (60 * blockScale, 40 * blockScale)
 all_sprites = pygame.sprite.Group()
 current_tetromino = []
@@ -14,26 +15,44 @@ boardTopY = boardCentreY - gameHeight / 2
 rotor = 1
 
 classicBase = [['' for x in range(gameWidth)] for y in range(gameHeight)]
+holdContainer = ''
+nextLetter = ''
+
 class randomiser():
     def randomiseletter(self):
-        letter = random.choice(['j', 'l', 'o', 'i', 's', 'z', 't'])
-        if letter in ('i', 'o'):
-            return letter, (gameWidth - 4) // 2
+        global nextLetter
+        nextLetter= random.choice(['j', 'l', 'o', 'i', 's', 'z', 't'])
+        return nextLetter
+    def defineSpawn(self, keyer=''):
+        if not keyer:
+            keyer = nextLetter
+            self.randomiseletter()
+        if keyer in ('i', 'o'):
+            return keyer, (gameWidth - 4) // 2
         else:
-            return letter, (gameWidth - 4) // 2 + 1
+            return keyer, (gameWidth - 4) // 2 + 1
 
-class infoBlock(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__(all_sprites)
+class infoBlock():
+    def displayTestTetros(self, letter, xdisc, ydisc):
+        x1, y1 = (tetrominoDisplay().coords.get(letter)[0])
+        x2, y2 = (tetrominoDisplay().coords.get(letter)[1])
+        x3, y3 = (tetrominoDisplay().coords.get(letter)[2])
+        x4, y4 = (tetrominoDisplay().coords.get(letter)[3])
+        tetrominoBlock(x1 + xdisc, y1 + ydisc, letter + 'mino.png').update()
+        tetrominoBlock(x2 + xdisc, y2 + ydisc, letter + 'mino.png').update()
+        tetrominoBlock(x3 + xdisc, y3 + ydisc, letter + 'mino.png').update()
+        tetrominoBlock(x4 + xdisc, y4 + ydisc, letter + 'mino.png').update()
+
 
 class tetrominoBlock(pygame.sprite.Sprite):
-    def __init__(self, x, y, filename):
+    def __init__(self, x, y, filename, screen=True):
         super().__init__(all_sprites)
         self.x = x + boardTopX
         self.y = y + boardTopY
         self.image = pygame.image.load(filename).convert_alpha()
         self.rect = self.image.get_rect()
-        self.rotationSit()
+        if screen:
+            self.rotationSit()
 
     def rotationSit(self):
         if rotor == 1:
@@ -64,7 +83,6 @@ class tableHandler():
                         if classicBase[j-1][l].islower():
                             item = classicBase[j-1][l]
                             classicBase[j-1][l] = ''
-                            print(j - 1)
                             classicBase[j][l] = item
 
 
@@ -157,10 +175,19 @@ class tetrominoDisplay():
             n += 1
         screenRefresh().refresh()
 
-
-
+nextLetter = randomiser().randomiseletter()
+font = pygame.font.SysFont('boldTestFont.ttf', 24)
+img = font.render('SCORE', True, (0, 23, 43))
+rect = img.get_rect()
+pygame.draw.rect(img, (255, 255, 255), rect, 1)
+img2 = font.render('NEXT', True, (0, 23, 43))
+rect = img2.get_rect()
+pygame.draw.rect(img, (255, 255, 255), rect, 1)
+img3 = font.render('HOLD', True, (0, 23, 43))
+rect = img3.get_rect()
+pygame.draw.rect(img, (255, 255, 255), rect, 1)
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption('Tetromino Test')
+pygame.display.set_caption('Tetris-0')
 screen.fill((255, 255, 255))
 x = (gameWidth - 4) // 2 + 1
 y = 0
@@ -172,6 +199,21 @@ rotator = ''
 elapsedT = 0
 timeClock = pygame.time.Clock()
 movementStop = False
+holdPause = False
+class holding():
+    def holder(self):
+        if not holdContainer:
+            keyed, x = randomiser().defineSpawn()
+        else:
+            keyed = holdContainer
+            _, x = randomiser().defineSpawn(keyed)
+        xCorner, yCorner = x, y
+        movementStop = False
+        for i in current_tetromino:
+            classicBase[i[1]][i[0]] = ''
+        current_tetromino.clear()
+        tetrominoDisplay(x, y, keyed).display()
+        return keyed, xCorner, yCorner, movementStop
 while running:
     for i in current_tetromino:
         if i[1] == gameHeight - 1:
@@ -217,22 +259,29 @@ while running:
                 rotor = 3
             elif event.key == pygame.K_4:
                 rotor = 4
+            elif event.key == pygame.K_h and not holdPause:
+                holdPause = True
+                keyed, xCorner, yCorner, movementStop = holding().holder()
+                holdContainer = rotator
+                rotator, keyed = keyed, ''
     if not current_tetromino:
-        keyed, x = randomiser().randomiseletter()
+        keyed, x = randomiser().defineSpawn()
         xCorner, yCorner = x, y
         movementStop = False
-        for i in current_tetromino:
-            classicBase[i[1]][i[0]] = ''
-        current_tetromino.clear()
         tetrominoDisplay(x, y, keyed).display()
         rotator, keyed = keyed, ''
     if not movementStop:
-        movementPauseL, movementPauseR, rotLock = False, False, False
+        movementPauseL, movementPauseR, rotLock, holdPause = False, False, False, False
     else:
         tableHandler().convertToFallen()
         tickSpeed = tempTick
         tableHandler().lineEraser()
     screen.fill((255, 255, 255))
     screenRefresh().refresh()
-
+    screen.blit(img, (50 * blockScale, 5 * blockScale))
+    screen.blit(img2, (50 * blockScale, 10 * blockScale))
+    screen.blit(img3, (50 * blockScale, 15 * blockScale))
+    if holdContainer:
+        infoBlock().displayTestTetros(holdContainer, 35, 8)
+    infoBlock().displayTestTetros(nextLetter, 35, 0)
     pygame.display.flip()
