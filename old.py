@@ -1,16 +1,19 @@
 import pygame
 import random
+blockScale = 24
 gameWidth, gameHeight = 10, 20
-(width, height) = (60 * 32, 39 * 32)
+(width, height) = (60 * blockScale, 40 * blockScale)
 all_sprites = pygame.sprite.Group()
 current_tetromino = []
 tickSpeed = 300
 tempTick = 300
-boardCornerX = 96
-boardCornerY = 96
+boardCentreX = 20
+boardCentreY = 20
+boardTopX = boardCentreX - gameWidth / 2
+boardTopY = boardCentreY - gameHeight / 2
+rotor = 1
 
-classicBase = [[' ' for x in range(gameWidth)] for y in range(gameHeight)]
-
+classicBase = [['' for x in range(gameWidth)] for y in range(gameHeight)]
 class randomiser():
     def randomiseletter(self):
         letter = random.choice(['j', 'l', 'o', 'i', 's', 'z', 't'])
@@ -19,16 +22,30 @@ class randomiser():
         else:
             return letter, (gameWidth - 4) // 2 + 1
 
+class infoBlock(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__(all_sprites)
+
 class tetrominoBlock(pygame.sprite.Sprite):
     def __init__(self, x, y, filename):
         super().__init__(all_sprites)
-        self.x = x
-        self.y = y
+        self.x = x + boardTopX
+        self.y = y + boardTopY
         self.image = pygame.image.load(filename).convert_alpha()
         self.rect = self.image.get_rect()
+        self.rotationSit()
 
+    def rotationSit(self):
+        if rotor == 1:
+            pass
+        elif rotor == 2:
+            self.x, self.y = boardCentreX + boardCentreY - self.y, -boardCentreX + boardCentreY + self.x
+        elif rotor == 3:
+            self.x, self.y = boardCentreX * 2 - self.x, boardCentreY * 2 - self.y
+        else:
+            self.x, self.y = boardCentreX - boardCentreY + self.y, boardCentreX + boardCentreY - self.x
     def update(self):
-        screen.blit(self.image, (self.x * 32 + boardCornerX, self.y * 32 + boardCornerY))
+        screen.blit(self.image, ((self.x)*blockScale, (self.y)*blockScale))
 
 class tableHandler():
     def convertToFallen(self):
@@ -39,14 +56,14 @@ class tableHandler():
         tickSpeed = 300
     def lineEraser(self):
         for i in range(gameHeight):
-            if ' ' not in classicBase[i]:
+            if '' not in classicBase[i]:
                 for it in range(gameWidth ):
-                    classicBase[i][it] = ' '
+                    classicBase[i][it] = ''
                 for j in range(i, gameWidth - 1, -1):
                     for l in range(gameWidth ):
                         if classicBase[j-1][l].islower():
                             item = classicBase[j-1][l]
-                            classicBase[j-1][l] = ' '
+                            classicBase[j-1][l] = ''
                             print(j - 1)
                             classicBase[j][l] = item
 
@@ -55,13 +72,13 @@ class screenRefresh():
     def refresh(self):
             all_sprites.empty()
             for y in range(gameHeight):
-                for x in range(gameWidth ):
-                    if classicBase[y][x] != ' ':
+                for x in range(gameWidth):
+                    # if classicBase[y][x] != '':
                         block = tetrominoBlock(x, y, classicBase[y][x].upper() + 'mino.png')
                         block.update()
 
 class tetrominoDisplay():
-    def __init__(self, x=0, y=0, letter=' '):
+    def __init__(self, x=0, y=0, letter=''):
         self.x, self.y = x, y
         self.letter = letter
         self.coords = {
@@ -110,7 +127,7 @@ class tetrominoDisplay():
             i[1] += yMod
             i[0] += xMod
             a.append(classicBase[i[1] - yMod][i[0] - xMod])
-            classicBase[i[1] - yMod][i[0] - xMod] = ' '
+            classicBase[i[1] - yMod][i[0] - xMod] = ''
         n = 0
         for i in current_tetromino:
             classicBase[i[1]][i[0]] = a[n]
@@ -119,7 +136,7 @@ class tetrominoDisplay():
     def rotationCheck(self, n):
         allowed = True
         for i in current_tetromino:
-            if i[0] - self.x + self.y >= gameHeight or (n - 1) - (i[1] - self.y) + self.x >= gameWidth  or (n - 1) - (i[1] - self.y) + self.x < 0:
+            if i[0] - self.x + self.y >= gameHeight or (n - 1) - (i[1] - self.y) + self.x >= gameWidth or (n - 1) - (i[1] - self.y) + self.x < 0:
                 allowed = False
         if allowed:
             for i in current_tetromino:
@@ -132,7 +149,7 @@ class tetrominoDisplay():
         a=[]
         for i in current_tetromino:
             a.append(classicBase[i[1]][i[0]])
-            classicBase[i[1]][i[0]] = ' '
+            classicBase[i[1]][i[0]] = ''
             i[1], i[0] = i[0] - self.x + self.y, (n - 1) - (i[1] - self.y) + self.x
         n = 0
         for i in current_tetromino:
@@ -192,12 +209,20 @@ while running:
                     screenRefresh().refresh()
                 else:
                     tetrominoDisplay(xCorner, yCorner, rotator).rotationCheck(3)
+            elif event.key == pygame.K_1:
+                rotor = 1
+            elif event.key == pygame.K_2:
+                rotor = 2
+            elif event.key == pygame.K_3:
+                rotor = 3
+            elif event.key == pygame.K_4:
+                rotor = 4
     if not current_tetromino:
         keyed, x = randomiser().randomiseletter()
         xCorner, yCorner = x, y
         movementStop = False
         for i in current_tetromino:
-            classicBase[i[1]][i[0]] = ' '
+            classicBase[i[1]][i[0]] = ''
         current_tetromino.clear()
         tetrominoDisplay(x, y, keyed).display()
         rotator, keyed = keyed, ''
