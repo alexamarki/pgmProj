@@ -5,17 +5,10 @@ pygame.font.init()
 blockScale = 24
 gameWidth, gameHeight = 40, 40
 
-
-mode = input('test style: num/file')
-if mode == 'n':
-    classicBase = [['BACK' for x in range(gameWidth)] for y in range(gameHeight)]
-else:
-    with open("input.txt", "r") as file:
-        classicBase = [[x for x in line.split()] for line in file]
-        print(classicBase)
-        gameHeight = len(classicBase)
-        gameWidth = len(classicBase[0])
-        print(gameWidth, gameHeight)
+with open("input.txt", "r") as file:
+    classicBase = [[x for x in line.split()] for line in file]
+    gameHeight = len(classicBase)
+    gameWidth = len(classicBase[0])
 
 (width, height) = (60 * blockScale, 40 * blockScale)
 all_sprites = pygame.sprite.Group()
@@ -104,13 +97,15 @@ class tableHandler():
             if 'BACK' not in classicBase[i]:
                 count += 1
                 for it in range(gameWidth):
-                    classicBase[i][it] = 'BACK'
+                    if classicBase[i][it] != '*':
+                        classicBase[i][it] = 'BACK'
                 for j in range(i, gameWidth - 1, -1):
                     for l in range(gameWidth):
                         if classicBase[j - 1][l].islower():
                             item = classicBase[j - 1][l]
-                            classicBase[j - 1][l] = 'BACK'
-                            classicBase[j][l] = item
+                            if classicBase[j - 1][l] != '*':
+                                classicBase[j - 1][l] = 'BACK'
+                                classicBase[j][l] = item
         if count == 1:
             score = 40
         elif count == 2:
@@ -127,9 +122,9 @@ class screenRefresh():
         all_sprites.empty()
         for y in range(gameHeight):
             for x in range(gameWidth):
-                # if classicBase[y][x] != 'BACK':
-                block = tetrominoBlock(x, y, classicBase[y][x].upper() + 'mino.png')
-                block.update()
+                if classicBase[y][x] != '*':
+                    block = tetrominoBlock(x, y, classicBase[y][x].upper() + 'mino.png')
+                    block.update()
 
 
 class tetrominoDisplay():
@@ -168,7 +163,7 @@ class tetrominoDisplay():
                 allowed = False
         if allowed:
             for i in current_tetromino:
-                if classicBase[i[1] + yMod][i[0] + xMod] in ('j', 'l', 'i', 'o', 's', 'z', 't'):
+                if classicBase[i[1] + yMod][i[0] + xMod] in ('j', 'l', 'i', 'o', 's', 'z', 't', '*'):
                     allowed = False
         if allowed:
             self.move(yMod, xMod)
@@ -198,7 +193,7 @@ class tetrominoDisplay():
         if allowed:
             for i in current_tetromino:
                 if classicBase[i[0] - self.x + self.y][(n - 1) - (i[1] - self.y) + self.x] in (
-                'j', 'l', 'i', 'o', 's', 'z', 't'):
+                'j', 'l', 'i', 'o', 's', 'z', 't', '*'):
                     allowed = False
         if allowed:
             self.rotate(n)
@@ -276,12 +271,11 @@ linesCleared = 0
 stage = 0
 while running:
     stage = int(linesCleared / 10)
-    if tempTick > (1/(23)) * 1000:
-        if tickSpeed != 5:
-            tickSpeed = (1/(3 + stage)) * 1000
-            tempTick = tickSpeed
-        else:
-            tempTick = (1/(3 + stage)) * 1000
+    if tickSpeed != 0.05:
+        tickSpeed = (1/(3 + stage)) * 1000
+        tempTick = tickSpeed
+    else:
+        tempTick = (1/(3 + stage)) * 1000
     imgScore = font.render(str(score), True, (0, 23, 43))
     rect = imgScore.get_rect()
     pygame.draw.rect(img, (255, 255, 255), rect, 1)
@@ -319,7 +313,7 @@ while running:
                 xCorner += 1
             elif event.key == pygame.K_DOWN:
                 tempTick = tickSpeed
-                tickSpeed = 5
+                tickSpeed = 0.05
             elif event.key == pygame.K_UP and rotator and not rotLock:
                 if rotator == 'i':
                     tetrominoDisplay(xCorner, yCorner, rotator).rotationCheck(4)
