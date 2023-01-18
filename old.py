@@ -108,7 +108,7 @@ class tableHandler():
             score = 200
         elif score == 4:
             score = 300
-        return score
+        return score, count
 
 
 class screenRefresh():
@@ -164,7 +164,7 @@ class tetrominoDisplay():
         elif not allowed and not xMod:
             tableHandler().convertToFallen()
             return tableHandler().lineEraser()
-        return 0
+        return 0, 0
 
     def move(self, yMod, xMod):
         a = []
@@ -261,18 +261,16 @@ class keyMovement():
     def moveDownQuick(self):
         pass
 
-fullClock = 0
+linesCleared = 0
 stage = 0
 while running:
-    stage = int(fullClock / 50000)
+    stage = int(linesCleared / 10)
     if tempTick > (1/(23)) * 1000:
         if tickSpeed != 5:
             tickSpeed = (1/(3 + stage)) * 1000
             tempTick = tickSpeed
-            print(stage, tickSpeed, tempTick)
         else:
             tempTick = (1/(3 + stage)) * 1000
-            print(stage, tickSpeed, tempTick)
     imgScore = font.render(str(score), True, (0, 23, 43))
     rect = imgScore.get_rect()
     pygame.draw.rect(img, (255, 255, 255), rect, 1)
@@ -284,10 +282,11 @@ while running:
         if i[0] == 0:
             movementPauseL = True
     dt = timeClock.tick()
-    fullClock += dt
     elapsedT += dt
     if elapsedT > tickSpeed and not movementStop:
-        score += tetrominoDisplay().movementCheck(1, 0) * (1 + stage)
+        scoreTemp, linesClearedTemp = tetrominoDisplay().movementCheck(1, 0)
+        score += scoreTemp * (1 + stage)
+        linesCleared += linesClearedTemp
         screenRefresh().refresh()
         yCorner += 1
         elapsedT = 0
@@ -296,11 +295,15 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT and not movementPauseL:
-                score += tetrominoDisplay().movementCheck(0, -1) * (1 + stage)
+                scoreTemp, linesClearedTemp = tetrominoDisplay().movementCheck(0, -1)
+                score += scoreTemp * (1 + stage)
+                linesCleared += linesClearedTemp
                 screenRefresh().refresh()
                 xCorner -= 1
             elif event.key == pygame.K_RIGHT and not movementPauseR:
-                score += tetrominoDisplay().movementCheck(0, 1) * (1 + stage)
+                scoreTemp, linesClearedTemp = tetrominoDisplay().movementCheck(0, 1)
+                score += scoreTemp * (1 + stage)
+                linesCleared += linesClearedTemp
                 screenRefresh().refresh()
                 xCorner += 1
             elif event.key == pygame.K_DOWN:
@@ -337,7 +340,9 @@ while running:
     else:
         tableHandler().convertToFallen()
         tickSpeed = tempTick
-        score += tableHandler().lineEraser() * (1 + stage)
+        scoreTemp, linesClearedTemp =  tableHandler().lineEraser()
+        score += scoreTemp * (1 + stage)
+        linesCleared += linesClearedTemp
         holdPause = False
     screen.fill((255, 255, 255))
     screenRefresh().refresh()
