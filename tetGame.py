@@ -3,7 +3,20 @@ import random
 
 pygame.font.init()
 blockScale = 24
-gameWidth, gameHeight = 10, 20
+gameWidth, gameHeight = 40, 40
+
+
+mode = input('test style: num/file')
+if mode == 'n':
+    classicBase = [['BACK' for x in range(gameWidth)] for y in range(gameHeight)]
+else:
+    with open("input.txt", "r") as file:
+        classicBase = [[x for x in line.split()] for line in file]
+        print(classicBase)
+        gameHeight = len(classicBase)
+        gameWidth = len(classicBase[0])
+        print(gameWidth, gameHeight)
+
 (width, height) = (60 * blockScale, 40 * blockScale)
 all_sprites = pygame.sprite.Group()
 current_tetromino = []
@@ -15,8 +28,6 @@ boardTopX = boardCentreX - gameWidth / 2
 boardTopY = boardCentreY - gameHeight / 2
 rotor = 1
 score = 0
-
-classicBase = [['' for x in range(gameWidth)] for y in range(gameHeight)]
 holdContainer = ''
 nextLetter = ''
 holdPause = False
@@ -90,15 +101,15 @@ class tableHandler():
         score = 0
         count = 0
         for i in range(gameHeight):
-            if '' not in classicBase[i]:
+            if 'BACK' not in classicBase[i]:
                 count += 1
                 for it in range(gameWidth):
-                    classicBase[i][it] = ''
+                    classicBase[i][it] = 'BACK'
                 for j in range(i, gameWidth - 1, -1):
                     for l in range(gameWidth):
                         if classicBase[j - 1][l].islower():
                             item = classicBase[j - 1][l]
-                            classicBase[j - 1][l] = ''
+                            classicBase[j - 1][l] = 'BACK'
                             classicBase[j][l] = item
         if count == 1:
             score = 40
@@ -116,7 +127,7 @@ class screenRefresh():
         all_sprites.empty()
         for y in range(gameHeight):
             for x in range(gameWidth):
-                # if classicBase[y][x] != '':
+                # if classicBase[y][x] != 'BACK':
                 block = tetrominoBlock(x, y, classicBase[y][x].upper() + 'mino.png')
                 block.update()
 
@@ -172,7 +183,7 @@ class tetrominoDisplay():
             i[1] += yMod
             i[0] += xMod
             a.append(classicBase[i[1] - yMod][i[0] - xMod])
-            classicBase[i[1] - yMod][i[0] - xMod] = ''
+            classicBase[i[1] - yMod][i[0] - xMod] = 'BACK'
         n = 0
         for i in current_tetromino:
             classicBase[i[1]][i[0]] = a[n]
@@ -196,7 +207,7 @@ class tetrominoDisplay():
         a = []
         for i in current_tetromino:
             a.append(classicBase[i[1]][i[0]])
-            classicBase[i[1]][i[0]] = ''
+            classicBase[i[1]][i[0]] = 'BACK'
             i[1], i[0] = i[0] - self.x + self.y, (n - 1) - (i[1] - self.y) + self.x
         n = 0
         for i in current_tetromino:
@@ -242,7 +253,7 @@ class holding():
         xCorner, yCorner = x, y
         movementStop = False
         for i in current_tetromino:
-            classicBase[i[1]][i[0]] = ''
+            classicBase[i[1]][i[0]] = 'BACK'
         current_tetromino.clear()
         tetrominoDisplay(x, y, keyed).display()
         return keyed, xCorner, yCorner, movementStop
