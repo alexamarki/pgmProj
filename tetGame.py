@@ -4,6 +4,7 @@ import random
 pygame.font.init()
 blockScale = 24
 gameWidth, gameHeight = 40, 40
+global classicBase
 
 with open("input.txt", "r") as file:
     classicBase = [[x for x in line.split()] for line in file]
@@ -19,7 +20,7 @@ boardCentreX = 20
 boardCentreY = 20
 boardTopX = boardCentreX - gameWidth / 2
 boardTopY = boardCentreY - gameHeight / 2
-rotor = 1
+rotor = 0
 score = 0
 holdContainer = ''
 nextLetter = ''
@@ -48,14 +49,14 @@ class infoBlock():
         x2, y2 = (tetrominoDisplay().coords.get(letter)[1])
         x3, y3 = (tetrominoDisplay().coords.get(letter)[2])
         x4, y4 = (tetrominoDisplay().coords.get(letter)[3])
-        tetrominoBlock(x1 + xdisc, y1 + ydisc, letter + 'mino.png', False).update()
-        tetrominoBlock(x2 + xdisc, y2 + ydisc, letter + 'mino.png', False).update()
-        tetrominoBlock(x3 + xdisc, y3 + ydisc, letter + 'mino.png', False).update()
-        tetrominoBlock(x4 + xdisc, y4 + ydisc, letter + 'mino.png', False).update()
+        tetrominoBlock(x1 + xdisc, y1 + ydisc, letter + 'mino.png').update()
+        tetrominoBlock(x2 + xdisc, y2 + ydisc, letter + 'mino.png').update()
+        tetrominoBlock(x3 + xdisc, y3 + ydisc, letter + 'mino.png').update()
+        tetrominoBlock(x4 + xdisc, y4 + ydisc, letter + 'mino.png').update()
 
 
 class tetrominoBlock(pygame.sprite.Sprite):
-    def __init__(self, x, y, filename, screen=True):
+    def __init__(self, x, y, filename):
         super().__init__(all_sprites)
         self.x = x
         self.y = y
@@ -67,11 +68,11 @@ class tetrominoBlock(pygame.sprite.Sprite):
             self.rotationSit()
 
     def rotationSit(self):
-        if rotor == 1:
+        if rotor % 4 == 1:
             pass
-        elif rotor == 2:
+        elif rotor % 4 == 2:
             self.x, self.y = boardCentreX + boardCentreY - self.y - 1, -boardCentreX + boardCentreY + self.x
-        elif rotor == 3:
+        elif rotor % 4 == 3:
             self.x, self.y = boardCentreX * 2 - self.x - 1, boardCentreY * 2 - self.y - 1
         else:
             self.x, self.y = boardCentreX - boardCentreY + self.y, boardCentreX + boardCentreY - self.x - 1
@@ -270,6 +271,7 @@ class keyMovement():
 linesCleared = 0
 stage = 0
 while running:
+    ROTATESCREEN = False
     stage = int(linesCleared / 10)
     if tickSpeed != 0.05:
         tickSpeed = (1/(3 + stage)) * 1000
@@ -292,7 +294,7 @@ while running:
         scoreTemp, linesClearedTemp = tetrominoDisplay().movementCheck(1, 0)
         score += scoreTemp * (1 + stage)
         linesCleared += linesClearedTemp
-        screenRefresh().refresh()
+        # screenRefresh().refresh()
         yCorner += 1
         elapsedT = 0
     for event in pygame.event.get():
@@ -321,25 +323,11 @@ while running:
                     screenRefresh().refresh()
                 else:
                     tetrominoDisplay(xCorner, yCorner, rotator).rotationCheck(3)
-            elif event.key == pygame.K_1:
-                rotor = 1
-            elif event.key == pygame.K_2:
-                rotor = 2
-            elif event.key == pygame.K_3:
-                rotor = 3
-            elif event.key == pygame.K_4:
-                rotor = 4
             elif event.key == pygame.K_h and not holdPause:
                 holdPause = True
                 keyed, xCorner, yCorner, movementStop = holding().holder()
                 holdContainer = rotator
                 rotator, keyed = keyed, ''
-    if not current_tetromino:
-        keyed, x = randomiser().defineSpawn()
-        xCorner, yCorner = x, y
-        movementStop = False
-        tetrominoDisplay(x, y, keyed).display()
-        rotator, keyed = keyed, ''
     if not movementStop:
         movementPauseL, movementPauseR, rotLock = False, False, False
     else:
@@ -349,6 +337,16 @@ while running:
         score += scoreTemp * (1 + stage)
         linesCleared += linesClearedTemp
         holdPause = False
+    if not current_tetromino:
+        rotor += 1
+        classicBase = list(zip(*classicBase))[::-1]
+        classicBase = list([list(elem) for elem in classicBase])
+        keyed, x = randomiser().defineSpawn()
+        xCorner, yCorner = x, y
+        movementStop = False
+        tetrominoDisplay(x, y, keyed).display()
+        rotator, keyed = keyed, ''
+
     screen.fill((255, 255, 255))
     screenRefresh().refresh()
     screen.blit(img, (50 * blockScale, 5 * blockScale))
