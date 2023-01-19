@@ -25,6 +25,26 @@ score = 0
 holdContainer = ''
 nextLetter = ''
 holdPause = False
+linesCleared = 0
+stage = 0
+
+font = pygame.font.SysFont('boldTestFont.ttf', 24)
+img = font.render('SCORE', True, (0, 23, 43))
+img2 = font.render('NEXT', True, (0, 23, 43))
+img3 = font.render('HOLD', True, (0, 23, 43))
+bg = pygame.image.load('test_bg.PNG')
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption('Tetris-0')
+x = (gameWidth - 4) // 2 + 1
+y = 0
+xCorner = x
+yCorner = y
+running = True
+keyed = ''
+rotator = ''
+elapsedT = 0
+timeClock = pygame.time.Clock()
+movementStop = False
 
 class finale():
     def deathScreen(self):
@@ -226,35 +246,6 @@ class tetrominoDisplay():
         screenRefresh().refresh()
 
 
-nextLetter = randomiser().randomiseletter()
-font = pygame.font.SysFont('boldTestFont.ttf', 24)
-img = font.render('SCORE', True, (0, 23, 43))
-rect = img.get_rect()
-pygame.draw.rect(img, (255, 255, 255), rect, 1)
-img2 = font.render('NEXT', True, (0, 23, 43))
-rect = img2.get_rect()
-pygame.draw.rect(img, (255, 255, 255), rect, 1)
-img3 = font.render('HOLD', True, (0, 23, 43))
-rect = img3.get_rect()
-pygame.draw.rect(img, (255, 255, 255), rect, 1)
-
-bg = pygame.image.load('test_bg.PNG')
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption('Tetris-0')
-screen.fill((255, 255, 255))
-x = (gameWidth - 4) // 2 + 1
-y = 0
-xCorner = x
-yCorner = y
-running = True
-keyed = ''
-rotator = ''
-elapsedT = 0
-timeClock = pygame.time.Clock()
-movementStop = False
-holdPause = False
-
-
 class holding():
     def holder(self):
         if not holdContainer:
@@ -284,9 +275,8 @@ class keyMovement():
     def moveDownQuick(self):
         pass
 
+nextLetter = randomiser().randomiseletter()
 
-linesCleared = 0
-stage = 0
 while running:
     ROTATESCREEN = False
     stage = int(linesCleared / 10)
@@ -297,7 +287,6 @@ while running:
         tempTick = (1 / (3 + stage)) * 1000
     imgScore = font.render(str(score), True, (0, 23, 43))
     rect = imgScore.get_rect()
-    pygame.draw.rect(img, (255, 255, 255), rect, 1)
     for i in current_tetromino:
         if i[1] == gameHeight - 1:
             movementStop, movementPauseL, movementPauseR, rotLock = True, True, True, True
