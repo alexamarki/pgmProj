@@ -26,7 +26,9 @@ holdContainer = ''
 nextLetter = ''
 holdPause = False
 
-
+class finale():
+    def deathScreen(self):
+        print('lmao')
 class randomiser():
     def randomiseletter(self):
         global nextLetter
@@ -94,27 +96,29 @@ class tableHandler():
     def lineEraser(self):
         score = 0
         count = 0
-        for i in range(gameHeight):
-            if 'BACK' not in classicBase[i]:
-                count += 1
-                for it in range(gameWidth):
-                    if classicBase[i][it] != '*':
+        global classicBase
+        for _ in range(4):
+            for i in range(0, gameHeight):
+                if 'BACK' not in classicBase[i]:
+                    count += 1
+                    for it in range(gameWidth):
                         classicBase[i][it] = 'BACK'
-                for j in range(i, gameHeight - 1):
-                    for l in range(15, gameWidth - 15):
-                        if classicBase[j - 1][l].islower():
-                            item = classicBase[j - 1][l]
-                            if classicBase[j - 1][l] != '*':
-                                classicBase[j - 1][l] = 'BACK'
+                    for j in range(i, 0, -1):
+                        for l in range(15, gameWidth - 16):
+                            if classicBase[j-1][l].islower():
+                                item = classicBase[j-1][l]
+                                classicBase[j-1][l] = 'BACK'
                                 classicBase[j][l] = item
+            classicBase = list(zip(*classicBase))[::-1]
+            classicBase = list([list(elem) for elem in classicBase])
         if count == 1:
             score = 40
         elif count == 2:
             score = 100
         elif count == 3:
             score = 200
-        elif score == 4:
-            score = 300
+        elif count >= 4:
+            score = 300 * (count / 4)
         return score, count
 
 
@@ -147,6 +151,14 @@ class tetrominoDisplay():
         x2, y2 = (self.coords.get(self.letter)[1])
         x3, y3 = (self.coords.get(self.letter)[2])
         x4, y4 = (self.coords.get(self.letter)[3])
+        if classicBase[y1][x1] != 'BACK':
+            finale().deathScreen()
+        elif classicBase[y1][x1] != 'BACK':
+            finale().deathScreen()
+        elif classicBase[y1][x1] != 'BACK':
+            finale().deathScreen()
+        elif classicBase[y1][x1] != 'BACK':
+            finale().deathScreen()
         classicBase[y1][x1] = self.letter.upper()
         classicBase[y2][x2] = self.letter.upper()
         classicBase[y3][x3] = self.letter.upper()
@@ -170,8 +182,10 @@ class tetrominoDisplay():
             self.move(yMod, xMod)
         elif not allowed and not xMod:
             tableHandler().convertToFallen()
-            return tableHandler().lineEraser()
-        return 0, 0
+            return *tableHandler().lineEraser(), False
+        else:
+            return 0, 0, False
+        return 0, 0, True
 
     def move(self, yMod, xMod):
         a = []
@@ -294,28 +308,31 @@ while running:
     dt = timeClock.tick()
     elapsedT += dt
     if elapsedT > tickSpeed and not movementStop:
-        scoreTemp, linesClearedTemp = tetrominoDisplay().movementCheck(1, 0)
+        scoreTemp, linesClearedTemp, moveFurther = tetrominoDisplay().movementCheck(1, 0)
         score += scoreTemp * (1 + stage)
         linesCleared += linesClearedTemp
         screenRefresh().refresh()
-        yCorner += 1
-        elapsedT = 0
+        if moveFurther:
+            yCorner += 1
+            elapsedT = 0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT and not movementPauseL:
-                scoreTemp, linesClearedTemp = tetrominoDisplay().movementCheck(0, -1)
+                scoreTemp, linesClearedTemp, moveFurther = tetrominoDisplay().movementCheck(0, -1)
                 score += scoreTemp * (1 + stage)
                 linesCleared += linesClearedTemp
                 screenRefresh().refresh()
-                xCorner -= 1
+                if moveFurther:
+                    xCorner -= 1
             elif event.key == pygame.K_RIGHT and not movementPauseR:
-                scoreTemp, linesClearedTemp = tetrominoDisplay().movementCheck(0, 1)
+                scoreTemp, linesClearedTemp, moveFurther = tetrominoDisplay().movementCheck(0, 1)
                 score += scoreTemp * (1 + stage)
                 linesCleared += linesClearedTemp
                 screenRefresh().refresh()
-                xCorner += 1
+                if moveFurther:
+                    xCorner += 1
             elif event.key == pygame.K_DOWN:
                 tempTick = tickSpeed
                 tickSpeed = 0.05
