@@ -14,7 +14,7 @@ with open("input.txt", "r") as file:
 (width, height) = (60 * blockScale, 40 * blockScale)
 all_sprites = pygame.sprite.Group()
 current_tetromino = []
-tickSpeed = (1/3) * 1000
+tickSpeed = (1 / 3) * 1000
 tempTick = tickSpeed
 boardCentreX = 20
 boardCentreY = 20
@@ -49,14 +49,14 @@ class infoBlock():
         x2, y2 = (tetrominoDisplay().coords.get(letter)[1])
         x3, y3 = (tetrominoDisplay().coords.get(letter)[2])
         x4, y4 = (tetrominoDisplay().coords.get(letter)[3])
-        tetrominoBlock(x1 + xdisc, y1 + ydisc, letter + 'mino.png').update()
-        tetrominoBlock(x2 + xdisc, y2 + ydisc, letter + 'mino.png').update()
-        tetrominoBlock(x3 + xdisc, y3 + ydisc, letter + 'mino.png').update()
-        tetrominoBlock(x4 + xdisc, y4 + ydisc, letter + 'mino.png').update()
+        tetrominoBlock(x1 + xdisc, y1 + ydisc, letter + 'mino.png', False).update()
+        tetrominoBlock(x2 + xdisc, y2 + ydisc, letter + 'mino.png', False).update()
+        tetrominoBlock(x3 + xdisc, y3 + ydisc, letter + 'mino.png', False).update()
+        tetrominoBlock(x4 + xdisc, y4 + ydisc, letter + 'mino.png', False).update()
 
 
 class tetrominoBlock(pygame.sprite.Sprite):
-    def __init__(self, x, y, filename):
+    def __init__(self, x, y, filename, screen=True):
         super().__init__(all_sprites)
         self.x = x
         self.y = y
@@ -100,8 +100,8 @@ class tableHandler():
                 for it in range(gameWidth):
                     if classicBase[i][it] != '*':
                         classicBase[i][it] = 'BACK'
-                for j in range(i, gameWidth - 1, -1):
-                    for l in range(gameWidth):
+                for j in range(i, gameHeight - 1):
+                    for l in range(15, gameWidth - 15):
                         if classicBase[j - 1][l].islower():
                             item = classicBase[j - 1][l]
                             if classicBase[j - 1][l] != '*':
@@ -123,7 +123,7 @@ class screenRefresh():
         all_sprites.empty()
         for y in range(gameHeight):
             for x in range(gameWidth):
-                if classicBase[y][x] != '*':
+                if classicBase[y][x] not in ('*', 'BACK'):
                     block = tetrominoBlock(x, y, classicBase[y][x].upper() + 'mino.png')
                     block.update()
 
@@ -194,7 +194,7 @@ class tetrominoDisplay():
         if allowed:
             for i in current_tetromino:
                 if classicBase[i[0] - self.x + self.y][(n - 1) - (i[1] - self.y) + self.x] in (
-                'j', 'l', 'i', 'o', 's', 'z', 't', '*'):
+                        'j', 'l', 'i', 'o', 's', 'z', 't', '*'):
                     allowed = False
         if allowed:
             self.rotate(n)
@@ -223,6 +223,8 @@ pygame.draw.rect(img, (255, 255, 255), rect, 1)
 img3 = font.render('HOLD', True, (0, 23, 43))
 rect = img3.get_rect()
 pygame.draw.rect(img, (255, 255, 255), rect, 1)
+
+bg = pygame.image.load('test_bg.PNG')
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Tetris-0')
 screen.fill((255, 255, 255))
@@ -268,16 +270,17 @@ class keyMovement():
     def moveDownQuick(self):
         pass
 
+
 linesCleared = 0
 stage = 0
 while running:
     ROTATESCREEN = False
     stage = int(linesCleared / 10)
     if tickSpeed != 0.05:
-        tickSpeed = (1/(3 + stage)) * 1000
+        tickSpeed = (1 / (3 + stage)) * 1000
         tempTick = tickSpeed
     else:
-        tempTick = (1/(3 + stage)) * 1000
+        tempTick = (1 / (3 + stage)) * 1000
     imgScore = font.render(str(score), True, (0, 23, 43))
     rect = imgScore.get_rect()
     pygame.draw.rect(img, (255, 255, 255), rect, 1)
@@ -294,7 +297,7 @@ while running:
         scoreTemp, linesClearedTemp = tetrominoDisplay().movementCheck(1, 0)
         score += scoreTemp * (1 + stage)
         linesCleared += linesClearedTemp
-        # screenRefresh().refresh()
+        screenRefresh().refresh()
         yCorner += 1
         elapsedT = 0
     for event in pygame.event.get():
@@ -333,7 +336,7 @@ while running:
     else:
         tableHandler().convertToFallen()
         tickSpeed = tempTick
-        scoreTemp, linesClearedTemp =  tableHandler().lineEraser()
+        scoreTemp, linesClearedTemp = tableHandler().lineEraser()
         score += scoreTemp * (1 + stage)
         linesCleared += linesClearedTemp
         holdPause = False
@@ -347,7 +350,7 @@ while running:
         tetrominoDisplay(x, y, keyed).display()
         rotator, keyed = keyed, ''
 
-    screen.fill((255, 255, 255))
+    screen.blit(bg, (0, 0))
     screenRefresh().refresh()
     screen.blit(img, (50 * blockScale, 5 * blockScale))
     screen.blit(img2, (50 * blockScale, 10 * blockScale))
