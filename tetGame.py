@@ -98,10 +98,10 @@ class tableHandler():
         count = 0
         global classicBase
         for _ in range(4):
-            for i in range(0, gameHeight):
+            for i in range(0, 15):
                 if 'BACK' not in classicBase[i]:
                     count += 1
-                    for it in range(gameWidth):
+                    for it in range(15, gameWidth - 16):
                         classicBase[i][it] = 'BACK'
                     for j in range(i, 0, -1):
                         for l in range(15, gameWidth - 16):
