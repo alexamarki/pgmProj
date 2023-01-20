@@ -1,8 +1,11 @@
+## DEPRECATED.
+
+
 import pygame
 import random
-
+import constants
 pygame.font.init()
-blockScale = 24
+
 gameWidth, gameHeight = 40, 40
 global classicBase
 
@@ -11,15 +14,12 @@ with open("input.txt", "r") as file:
     gameHeight = len(classicBase)
     gameWidth = len(classicBase[0])
 
-(width, height) = (60 * blockScale, 40 * blockScale)
+
 all_sprites = pygame.sprite.Group()
 current_tetromino = []
-tickSpeed = (1 / 3) * 1000
-tempTick = tickSpeed
-boardCentreX = 20
-boardCentreY = 20
-boardTopX = boardCentreX - gameWidth / 2
-boardTopY = boardCentreY - gameHeight / 2
+tickSpeed = 0
+boardTopX = constants.boardCentreX - gameWidth / 2
+boardTopY = constants.boardCentreY - gameHeight / 2
 rotor = 0
 score = 0
 holdContainer = ''
@@ -28,17 +28,12 @@ holdPause = False
 linesCleared = 0
 stage = 0
 
-font = pygame.font.SysFont('boldTestFont.ttf', 24)
-img = font.render('SCORE', True, (0, 23, 43))
-img2 = font.render('NEXT', True, (0, 23, 43))
-img3 = font.render('HOLD', True, (0, 23, 43))
+font = constants.font
 bg = pygame.image.load('test_bg.PNG')
-screen = pygame.display.set_mode((width, height))
+screen = pygame.display.set_mode((constants.width, constants.height))
 pygame.display.set_caption('Tetris-0')
-x = (gameWidth - 4) // 2 + 1
-y = 0
-xCorner = x
-yCorner = y
+xCorner = (gameWidth - 4) // 2 + 1
+yCorner = constants.startCornerY
 running = True
 keyed = ''
 rotator = ''
@@ -93,14 +88,14 @@ class tetrominoBlock(pygame.sprite.Sprite):
         if rotor % 4 == 1:
             pass
         elif rotor % 4 == 2:
-            self.x, self.y = boardCentreX + boardCentreY - self.y - 1, -boardCentreX + boardCentreY + self.x
+            self.x, self.y = constants.boardCentreX + constants.boardCentreY - self.y - 1, -constants.boardCentreX + constants.boardCentreY + self.x
         elif rotor % 4 == 3:
-            self.x, self.y = boardCentreX * 2 - self.x - 1, boardCentreY * 2 - self.y - 1
+            self.x, self.y = constants.boardCentreX * 2 - self.x - 1, constants.boardCentreY * 2 - self.y - 1
         else:
-            self.x, self.y = boardCentreX - boardCentreY + self.y, boardCentreX + boardCentreY - self.x - 1
+            self.x, self.y = constants.boardCentreX - constants.boardCentreY + self.y, constants.boardCentreX + constants.boardCentreY - self.x - 1
 
     def update(self):
-        screen.blit(self.image, ((self.x) * blockScale, (self.y) * blockScale))
+        screen.blit(self.image, ((self.x) * constants.blockScale, (self.y) * constants.blockScale))
 
 
 class tableHandler():
@@ -121,10 +116,10 @@ class tableHandler():
             for i in range(0, 15):
                 if 'BACK' not in classicBase[i]:
                     count += 1
-                    for it in range(15, gameWidth - 16):
+                    for it in range(15, gameWidth - 15):
                         classicBase[i][it] = 'BACK'
                     for j in range(i, 0, -1):
-                        for l in range(15, gameWidth - 16):
+                        for l in range(15, gameWidth - 15):
                             if classicBase[j-1][l].islower():
                                 item = classicBase[j-1][l]
                                 classicBase[j-1][l] = 'BACK'
@@ -253,12 +248,12 @@ class holding():
         else:
             keyed = holdContainer
             _, x = randomiser().defineSpawn(keyed)
-        xCorner, yCorner = x, y
+        xCorner, yCorner = x, constants.startCornerY
         movementStop = False
         for i in current_tetromino:
             classicBase[i[1]][i[0]] = 'BACK'
         current_tetromino.clear()
-        tetrominoDisplay(x, y, keyed).display()
+        tetrominoDisplay(x, constants.startCornerY, keyed).display()
         return keyed, xCorner, yCorner, movementStop
 
 
@@ -280,11 +275,8 @@ nextLetter = randomiser().randomiseletter()
 while running:
     ROTATESCREEN = False
     stage = int(linesCleared / 10)
-    if tickSpeed != 0.05:
+    if tickSpeed != constants.dropTick:
         tickSpeed = (1 / (3 + stage)) * 1000
-        tempTick = tickSpeed
-    else:
-        tempTick = (1 / (3 + stage)) * 1000
     imgScore = font.render(str(score), True, (0, 23, 43))
     rect = imgScore.get_rect()
     for i in current_tetromino:
@@ -323,8 +315,7 @@ while running:
                 if moveFurther:
                     xCorner += 1
             elif event.key == pygame.K_DOWN:
-                tempTick = tickSpeed
-                tickSpeed = 0.05
+                tickSpeed = constants.dropTick
             elif event.key == pygame.K_UP and rotator and not rotLock:
                 if rotator == 'i':
                     tetrominoDisplay(xCorner, yCorner, rotator).rotationCheck(4)
@@ -341,7 +332,6 @@ while running:
         movementPauseL, movementPauseR, rotLock = False, False, False
     else:
         tableHandler().convertToFallen()
-        tickSpeed = tempTick
         scoreTemp, linesClearedTemp = tableHandler().lineEraser()
         score += scoreTemp * (1 + stage)
         linesCleared += linesClearedTemp
@@ -351,17 +341,17 @@ while running:
         classicBase = list(zip(*classicBase))[::-1]
         classicBase = list([list(elem) for elem in classicBase])
         keyed, x = randomiser().defineSpawn()
-        xCorner, yCorner = x, y
+        xCorner, yCorner = x, constants.startCornerY
         movementStop = False
-        tetrominoDisplay(x, y, keyed).display()
+        tetrominoDisplay(x, constants.startCornerY, keyed).display()
         rotator, keyed = keyed, ''
 
     screen.blit(bg, (0, 0))
     screenRefresh().refresh()
-    screen.blit(img, (50 * blockScale, 5 * blockScale))
-    screen.blit(img2, (50 * blockScale, 10 * blockScale))
-    screen.blit(img3, (50 * blockScale, 15 * blockScale))
-    screen.blit(imgScore, (50 * blockScale, 7 * blockScale))
+    screen.blit(constants.img, (50 * constants.blockScale, 5 * constants.blockScale))
+    screen.blit(constants.img2, (50 * constants.blockScale, 10 * constants.blockScale))
+    screen.blit(constants.img3, (50 * constants.blockScale, 15 * constants.blockScale))
+    screen.blit(imgScore, (50 * constants.blockScale, 7 * constants.blockScale))
     if holdContainer:
         infoBlock().displayTestTetros(holdContainer, 50, 17)
     infoBlock().displayTestTetros(nextLetter, 50, 12)
