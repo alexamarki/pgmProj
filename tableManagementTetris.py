@@ -1,4 +1,4 @@
-import constants, variables, guiTetris
+import constants, variables, guiTetris, guiScreens
 import random
 
 class randomiser():
@@ -37,6 +37,10 @@ class tableHandler():
         score = 0
         count = 0
         for _ in range(4):
+            for l in range(4):
+                for n in range(2):
+                    if variables.classicBase[n][variables.gameWidth // 2 - 2 + l] != 'BACK':
+                        guiScreens.screens().setScreenTo('mainMenu_bg.jpg', 'So long', 'gameOver')
             for i in range(0, 15):
                 if 'BACK' not in variables.classicBase[i]:
                     count += 1
@@ -80,14 +84,6 @@ class tetrominoDisplay():
         x2, y2 = (constants.tetrominod(self.x, self.y).get(self.letter)[1])
         x3, y3 = (constants.tetrominod(self.x, self.y).get(self.letter)[2])
         x4, y4 = (constants.tetrominod(self.x, self.y).get(self.letter)[3])
-        # if classicBase[y1][x1] != 'BACK':
-        #     finale().deathScreen()
-        # elif classicBase[y1][x1] != 'BACK':
-        #     finale().deathScreen()
-        # elif classicBase[y1][x1] != 'BACK':
-        #     finale().deathScreen()
-        # elif classicBase[y1][x1] != 'BACK':
-        #     finale().deathScreen()
         variables.classicBase[y1][x1] = self.letter.upper()
         variables.classicBase[y2][x2] = self.letter.upper()
         variables.classicBase[y3][x3] = self.letter.upper()
@@ -170,15 +166,5 @@ class holding():
         tetrominoDisplay(x, constants.startCornerY, keyed).display()
         return keyed, xCorner, yCorner, movementStop
 
-class keyMovement():
-    def moveDown(self):
-        pass
-
-    def moveRight(self):
-        pass
-
-    def moveLeft(self):
-        pass
-
-    def moveDownQuick(self):
-        pass
+def override():
+    exit()

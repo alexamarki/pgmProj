@@ -6,7 +6,8 @@ boardCentreX = 20
 boardCentreY = 20
 blockScale = 24
 (width, height) = (60 * blockScale, 40 * blockScale)
-startCornerXtet = 19
+#startCornerXtet = 19
+startCornerXtet = 3
 startCornerY = 0
 letters = ['j', 'l', 'o', 'i', 's', 'z', 't']
 def tetrominod(x, y):
