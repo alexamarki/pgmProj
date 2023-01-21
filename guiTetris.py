@@ -28,6 +28,3 @@ class tetrominoBlock(pygame.sprite.Sprite):
 
     def update(self, screen):
         screen.blit(self.image, ((self.x) * constants.blockScale, (self.y) * constants.blockScale))
-
-def override():
-    exit()

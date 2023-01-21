@@ -6,10 +6,15 @@ boardCentreX = 20
 boardCentreY = 20
 blockScale = 24
 (width, height) = (60 * blockScale, 40 * blockScale)
-#startCornerXtet = 19
 startCornerXtet = 3
 startCornerY = 0
 letters = ['j', 'l', 'o', 'i', 's', 'z', 't']
+gameOver = 'death_bg.PNG'
+mainMenu = 'mainMenu_bg.PNG'
+leaderBoard = 'leader_bg.PNG'
+tetrisMenu = 'tetrisMenu_bg.PNG'
+tet_A = 'test_bg.PNG'
+tet = 'tetrisGame_bg.PNG'
 def tetrominod(x, y):
     tetrominos = {
                 'l': [(x + 2, y), (x, y + 1), (x + 1, y + 1), (x + 2, y + 1)],

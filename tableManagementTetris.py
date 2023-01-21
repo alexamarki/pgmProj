@@ -1,4 +1,4 @@
-import constants, variables, guiTetris, guiScreens
+import constants, variables, guiTetris, guiScreens, json
 import random
 
 class randomiser():
@@ -32,28 +32,39 @@ class tableHandler():
         variables.current_tetromino.clear()
         variables.tickSpeed = (1 / (3 + variables.stage)) * 1000
         variables.holdPause = False
+        variables.dropSound.play()
 
     def lineEraser(self):
         score = 0
         count = 0
-        for _ in range(4):
+        iter = 1
+        sides = 0
+        heightCheck = variables.gameHeight
+        if variables.gameState == 'Tet-a-tet':
+            iter = 4
+            sides = 15
+            heightCheck = 15
+        for _ in range(iter):
             for l in range(4):
                 for n in range(2):
                     if variables.classicBase[n][variables.gameWidth // 2 - 2 + l] != 'BACK':
-                        guiScreens.screens().setScreenTo('mainMenu_bg.jpg', 'So long', 'gameOver')
-            for i in range(0, 15):
+                        guiScreens.screens().setScreenTo(constants.gameOver, 'So long', 'gameOver')
+            for i in range(0, heightCheck):
                 if 'BACK' not in variables.classicBase[i]:
                     count += 1
-                    for it in range(15, variables.gameWidth - 15):
+                    for it in range(sides, variables.gameWidth - sides):
                         variables.classicBase[i][it] = 'BACK'
                     for j in range(i, 0, -1):
-                        for l in range(15, variables.gameWidth - 15):
+                        for l in range(sides, variables.gameWidth - sides):
                             if variables.classicBase[j-1][l].islower():
                                 item = variables.classicBase[j-1][l]
                                 variables.classicBase[j-1][l] = 'BACK'
                                 variables.classicBase[j][l] = item
-            variables.classicBase = list(zip(*variables.classicBase))[::-1]
-            variables.classicBase = list([list(elem) for elem in variables.classicBase])
+            if variables.gameState == 'Tet-a-tet':
+                variables.classicBase = list(zip(*variables.classicBase))[::-1]
+                variables.classicBase = list([list(elem) for elem in variables.classicBase])
+        if count > 0:
+            variables.clearSound.play()
         if count == 1:
             score = 40
         elif count == 2:
@@ -166,5 +177,19 @@ class holding():
         tetrominoDisplay(x, constants.startCornerY, keyed).display()
         return keyed, xCorner, yCorner, movementStop
 
-def override():
-    exit()
+class leader():
+    def add(self, user, score):
+        with open("leader.json", "r") as leaderboardFile:
+            lb = json.load(leaderboardFile)
+        if user in lb:
+            if lb[user] < score:
+                lb[user] = score
+        else:
+            lb[user] = score
+        with open("leader.json", "w") as leaderboardFile:
+            json.dump(lb, leaderboardFile)
+
+    def aquireLeaders(self):
+        with open("leader.json", "r") as leaderboardFile:
+            lb = json.load(leaderboardFile)
+        variables.leaderList = sorted(lb.items(), key=lambda item: item[1])[0:10]

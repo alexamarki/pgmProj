@@ -6,13 +6,14 @@ import random
 import constants
 pygame.font.init()
 
-gameWidth, gameHeight = 40, 40
+gameWidth, gameHeight = 10, 20
 global classicBase
 
-with open("input.txt", "r") as file:
-    classicBase = [[x for x in line.split()] for line in file]
-    gameHeight = len(classicBase)
-    gameWidth = len(classicBase[0])
+# with open("input.txt", "r") as file:
+#     classicBase = [[x for x in line.split()] for line in file]
+#     gameHeight = len(classicBase)
+#     gameWidth = len(classicBase[0])
+classicBase = [['BACK' for x in range(10)] for line in range(20)]
 
 
 all_sprites = pygame.sprite.Group()
@@ -113,13 +114,13 @@ class tableHandler():
         count = 0
         global classicBase
         for _ in range(4):
-            for i in range(0, 15):
+            for i in range(0, gameHeight):
                 if 'BACK' not in classicBase[i]:
                     count += 1
-                    for it in range(15, gameWidth - 15):
+                    for it in range(0, gameWidth - 1):
                         classicBase[i][it] = 'BACK'
                     for j in range(i, 0, -1):
-                        for l in range(15, gameWidth - 15):
+                        for l in range(0, gameWidth - 1):
                             if classicBase[j-1][l].islower():
                                 item = classicBase[j-1][l]
                                 classicBase[j-1][l] = 'BACK'
