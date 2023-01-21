@@ -1,4 +1,5 @@
-import pygame, constants
+import pygame
+import constants
 
 pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.mixer.init()

@@ -1,6 +1,5 @@
-import constants, variables, guiTetris, guiScreens, json
-import random
-
+import random, json
+import constants, variables, guiTetris, guiScreens
 
 class randomiser():
     def randomiseletter(self):

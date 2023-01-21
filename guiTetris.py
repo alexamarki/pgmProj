@@ -1,5 +1,5 @@
-import constants, variables
 import pygame
+import constants, variables
 
 with open("input.txt", "r") as file:
     classicBase = [[x for x in line.split()] for line in file]

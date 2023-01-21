@@ -1,6 +1,5 @@
 import pygame
-import tableManagementTetris, variables, guiScreens, guiTetris
-import constants
+import tableManagementTetris, variables, guiScreens, guiTetris, constants
 
 boardTopX = constants.boardCentreX - variables.gameWidth / 2
 boardTopY = constants.boardCentreY - variables.gameHeight / 2

@@ -1,6 +1,5 @@
-import pygame, constants, variables
-import tableManagementTetris
-
+import pygame
+import tableManagementTetris, constants, variables
 
 class screens():
     def setScreenTo(self, backgroundLink, winName, gs):
