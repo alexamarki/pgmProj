@@ -1,9 +1,12 @@
 import constants, variables
 import pygame
+
 with open("input.txt", "r") as file:
     classicBase = [[x for x in line.split()] for line in file]
     gameHeight = len(classicBase)
     gameWidth = len(classicBase[0])
+
+
 class tetrominoBlock(pygame.sprite.Sprite):
     def __init__(self, x, y, filename, screen=True):
         super().__init__(variables.all_sprites)
@@ -28,3 +31,9 @@ class tetrominoBlock(pygame.sprite.Sprite):
 
     def update(self, screen):
         screen.blit(self.image, ((self.x) * constants.blockScale, (self.y) * constants.blockScale))
+
+
+class AnimationExc(pygame.sprite.Sprite):
+    def blitIt(self):
+        variables.screen.blit(pygame.image.load(f'frame{int(variables.framed % 11 // 1) + 1}.png').convert_alpha(),
+                              (780, 30))

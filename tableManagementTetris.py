@@ -1,6 +1,7 @@
 import constants, variables, guiTetris, guiScreens, json
 import random
 
+
 class randomiser():
     def randomiseletter(self):
         variables.nextLetter = random.choice(constants.letters)
@@ -14,6 +15,7 @@ class randomiser():
         else:
             return keyer, (variables.gameWidth - 4) // 2 + 1
 
+
 class infoBlock():
     def displayTestTetros(self, letter, xdisc, ydisc, screen):
         x1, y1 = (constants.tetrominod(0, 0).get(letter)[0])
@@ -24,6 +26,7 @@ class infoBlock():
         guiTetris.tetrominoBlock(x2 + xdisc, y2 + ydisc, letter + 'mino.png', False).update(screen)
         guiTetris.tetrominoBlock(x3 + xdisc, y3 + ydisc, letter + 'mino.png', False).update(screen)
         guiTetris.tetrominoBlock(x4 + xdisc, y4 + ydisc, letter + 'mino.png', False).update(screen)
+
 
 class tableHandler():
     def convertToFallen(self):
@@ -56,9 +59,9 @@ class tableHandler():
                         variables.classicBase[i][it] = 'BACK'
                     for j in range(i, 0, -1):
                         for l in range(sides, variables.gameWidth - sides):
-                            if variables.classicBase[j-1][l].islower():
-                                item = variables.classicBase[j-1][l]
-                                variables.classicBase[j-1][l] = 'BACK'
+                            if variables.classicBase[j - 1][l].islower():
+                                item = variables.classicBase[j - 1][l]
+                                variables.classicBase[j - 1][l] = 'BACK'
                                 variables.classicBase[j][l] = item
             if variables.gameState == 'Tet-a-tet':
                 variables.classicBase = list(zip(*variables.classicBase))[::-1]
@@ -84,6 +87,7 @@ class screenRefresh():
                 if variables.classicBase[y][x] not in ('*', 'BACK'):
                     block = guiTetris.tetrominoBlock(x, y, variables.classicBase[y][x].upper() + 'mino.png')
                     block.update(screen)
+
 
 class tetrominoDisplay():
     def __init__(self, x=0, y=0, letter=''):
@@ -138,7 +142,8 @@ class tetrominoDisplay():
     def rotationCheck(self, n):
         allowed = True
         for i in variables.current_tetromino:
-            if i[0] - self.x + self.y >= variables.gameHeight or (n - 1) - (i[1] - self.y) + self.x >= variables.gameWidth or (n - 1) - (
+            if i[0] - self.x + self.y >= variables.gameHeight or (n - 1) - (
+                    i[1] - self.y) + self.x >= variables.gameWidth or (n - 1) - (
                     i[1] - self.y) + self.x < 0:
                 allowed = False
         if allowed:
@@ -177,6 +182,7 @@ class holding():
         tetrominoDisplay(x, constants.startCornerY, keyed).display()
         return keyed, xCorner, yCorner, movementStop
 
+
 class leader():
     def add(self, user, score):
         with open("leader.json", "r") as leaderboardFile:
@@ -189,7 +195,14 @@ class leader():
         with open("leader.json", "w") as leaderboardFile:
             json.dump(lb, leaderboardFile)
 
-    def aquireLeaders(self):
+    def acquireLeaders(self):
         with open("leader.json", "r") as leaderboardFile:
             lb = json.load(leaderboardFile)
-        variables.leaderList = sorted(lb.items(), key=lambda item: item[1])[0:10]
+        variables.leaderList = sorted(lb.items(), key=lambda item: item[1])[:10][::-1]
+        count = 0
+        for i in variables.leaderList:
+            person = constants.fontL.render(i[0], True, (0, 23, 43))
+            score = constants.fontL.render(str(i[1]), True, (0, 23, 43))
+            variables.screen.blit(person, (40, 110 + 84 * count))
+            variables.screen.blit(score, (700, 110 + 84 * count))
+            count += 1
